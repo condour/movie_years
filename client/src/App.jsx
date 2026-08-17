@@ -63,8 +63,6 @@ export default function App() {
   }
   if (!round) return <div className="app loading">Loading a round…</div>;
 
-  const movieById = Object.fromEntries(round.movies.map((m) => [m.id, m]));
-
   // ---- Interaction --------------------------------------------------------
   function handleMovieClick(movieId) {
     if (submitted) return;

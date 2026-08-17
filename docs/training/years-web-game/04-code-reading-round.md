@@ -32,18 +32,15 @@ just been picked up (`selectedYearIdx` set), and the user clicks a movie that
 - C. The movie is picked up alongside its old assignment, so it appears twice.
 - D. The handler returns immediately and nothing changes.
 
-**Q3.** In the render body of `App.jsx` this line appears:
+**Q3.** Open `client/src/App.jsx` and find the `.result` span on the movie cards.
+For a **wrong** match, it shows the movie's true year. Where does that year
+value actually come from?
 
-```js
-const movieById = Object.fromEntries(round.movies.map((m) => [m.id, m]));
-```
-
-Where else is `movieById` referenced in the file, and what role does it play?
-
-- A. It is used by `handleMovieClick` to look up each movie's data.
-- B. It is never referenced anywhere else in the file — dead code.
-- C. It is passed to the `<img>` components for the poster URL.
-- D. It replaces the `movieById` lookup in the scoring loop.
+- A. `assignments` — the year the user picked, looked up in `round.years`.
+- B. `result.results[m.id].year` — the true year the server returns in its
+  grading response, having only now revealed it to the client.
+- C. `round.movies[m.id].year` — a year field pre-loaded on each movie.
+- D. A year read straight back out of `movies.json` on the client.
 
 **Q4.** Read `server.js`, focusing on `app.use(express.json())` and the list of
 routes (`/api/round`, static files). Does the JSON body-parsing middleware
