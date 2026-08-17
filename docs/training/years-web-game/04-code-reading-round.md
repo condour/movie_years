@@ -7,7 +7,7 @@ alone. Open the actual files and trace the logic side by side.
 
 - `client/src/App.jsx` — the two handlers `handleMovieClick` / `handleYearClick`,
   the render body, and `submit()`.
-- `server.js` — the route wiring.
+- `server.js` — the route wiring (`/api/round`, `/api/submit`, static files).
 
 Work through the trace before answering.
 
@@ -46,21 +46,22 @@ Where else is `movieById` referenced in the file, and what role does it play?
 - D. It replaces the `movieById` lookup in the scoring loop.
 
 **Q4.** Read `server.js`, focusing on `app.use(express.json())` and the list of
-routes (`/api/round`, static files). The JSON body-parsing middleware is added,
-but is there anything for it to parse?
+routes (`/api/round`, static files). Does the JSON body-parsing middleware
+actually get a request body to parse?
 
-- A. No — every route is a GET handler (round) or static serving, so
-  `express.json()` never gets a request body to process.
-- B. Yes — POST requests from the client send JSON for scoring.
-- C. Yes — the round POST body is parsed on `/api/round`.
-- D. Yes — WebSocket upgrades send JSON that the middleware must read.
+- A. No — `/api/round` is a GET and static serving sends files, so
+  `express.json()` is never handed a request body.
+- B. Yes — the client POSTs `{ roundId, assignments }` as JSON to `/api/submit`
+  for server-side grading, so the middleware is required.
+- C. Yes — the client POSTs JSON straight to `/api/round`.
+- D. Yes — WebSocket upgrades send JSON that the middleware reads.
 
 ## Answer key
 
 <!-- ROT13:START -->
-Nafjref: 1-O, 2-N, 3-O, 4-N
+Nafjref: 1-O, 2-N, 3-O, 4-O
 1-O: unaqyrLrnePyvpx ergheaf rneyl jura lrneVqk vf nyernql vafvqr nffvtarqZbivrLrnef.olLrne, fb gur pyvpx vf vtaberq naq gur zbivr fgnlf cvpxrq hc.
 2-N: unaqyrZbivrPyvpx pnyyf frgFryrpgrqLrneVqk(ahyy) orsber gur nffvtazrag oenapu, fb pyvpxvat na nyernql-nffvtarq zbivr obgu qebcf gung nffvtazrag naq pyrnef nal yvsgrq lrne.
 3-O: zbivrOlVq vf pbzchgrq va gur eraqre obql ohg arire ersreraprq naljurer ryfr va gur svyr, znxvat vg qrnq pbqr.
-4-N: rirel ebhgr vf rvgure gur TRG /ncv/ebhaq unaqyre be fgngvp svyr freivat, fb gurer vf ab erdhrfg obql gb cnefr naq gur rkcerff.wfba() zvqqyrjner vf jverq hc ohg arire pbafhzrq.
+4-O: gur pyvrag CBFGf {ebhaqVq, nffvtazragf} nf WFBA gb /ncv/fhozvg sbe tenqvat, fb rkcerff.wfba() svanyyl unf n erdhrfg obql gb cnefr.
 <!-- ROT13:END -->

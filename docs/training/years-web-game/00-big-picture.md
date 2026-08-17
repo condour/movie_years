@@ -33,11 +33,13 @@ TMDB ──npm run fetch──▶ fetch-movies.js ──writes──▶ movies.j
 ## Two roles for "backend"
 
 - **Data authority:** the server picks which 4 movies appear and which 4 years
-  are shown. Each movie's **true** release year is included in the round
-  payload.
-- **Correctness judge:** the **client**. Because the true year ships with every
-  movie, `App.jsx` can compare the user's choice to the real year locally and
-  colour the cards green/red. No round-trip to the server is needed to grade.
+  are shown. Only the **shuffled years** are sent; each movie's **true**
+  release year is kept in a server-side answer key keyed by round id.
+- **Correctness judge:** the **server**. Because the true years never reach the
+  browser, a player can't read the answer out of the page state or the bundle.
+  When the user submits, `App.jsx` POSTs the round id + matches to
+  `POST /api/submit`, and the server grades against its answer key and returns
+  the per-movie results.
 
 ## Dev vs. production
 
@@ -57,13 +59,13 @@ Answer from **this module only** — the repo is not needed.
 - C. It downloads a new list from TMDB on every page load.
 - D. It ships the movie list embedded inside the React bundle.
 
-**Q2.** Where is a round's correctness actually judged (movies marked
-green/red)?
+**Q2.** Where does the running game actually decide whether a match is correct
+(cards turn green/red)?
 
-- A. On the server, in the `/api/round` handler.
-- B. In the client, inside `App.jsx`, using each movie's true year.
+- A. On the client, inside `App.jsx`, using each movie's true year.
+- B. On the server, at `POST /api/submit`, against an answer key kept per round.
 - C. By a second call to TMDB at submit time.
-- D. The server holds an answer sheet retrieved from `movies.json`.
+- D. The server re-reads `movies.json` for the answer on every submission.
 
 **Q3.** In development mode, how does the React dev server reach `/api/round`?
 
@@ -75,8 +77,8 @@ green/red)?
 ## Answer key
 
 <!-- ROT13:START -->
-Nafjref: 1-O, 2-O, 3-N
+Nafjref: 1-O, 2-O, 3-P
 1-O: freire.wf bayl ernqf zbivrf.wfba qhevat vgf jubyr yvsrgvzr; srgpu-zbivrf.wf qbrf gur bar-gvzr qbjaybnq. Gur ehagvzr znxrf mreb GZQO pnyyf.
-2-O: gur freire vapyhqrf rnpu zbivr gehr eryrnfr lrne va gur ebhaq cnlybnq, fb pbeerpgarff vf whqtrq pyvrag-fvqr va Ncc.wfk, abg ba gur freire.
-3-N: qri zbqr ehaf gjb cebprffrf (Rkcerff ba 4310 naq Ivgr ba 5173); Ivgr cebkvrf /ncv gb gur onpxraq, juvyr cebqhpgvba freirf gur ohvyg ncc fgenvtug sebz Rkcerff.
+2-O: gur freire xrrcf rnpu ebhaq'f gehr lrnef va n freire-fvqr nafjre xrl naq tenqrf ba CBFG /ncv/fhozvg, fb pbeerpgarff vf arire qrpvqrq va gur oebjfre.
+3-P: qri zbqr ehaf gjb cebprffrf (Rkcerff ba 4310 naq Ivgr ba 5173); Ivgr cebkvrf /ncv gb gur onpxraq, juvyr cebqhpgvba freirf gur ohvyg ncc fgenvtug sebz Rkcerff.
 <!-- ROT13:END -->

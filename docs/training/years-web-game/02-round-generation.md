@@ -44,6 +44,8 @@ function shuffled(arr) {
 already used. A movie is kept only if its release year is **new**:
 
 ```js
+const rounds = new Map(); // roundId -> { byId: Map(movieId -> year), years }
+
 function buildRound() {
   const picked = [];
   const usedYears = new Set();
@@ -55,9 +57,15 @@ function buildRound() {
   }
 
   const years = shuffled(picked.map((m) => m.year));   // shuffle the 4 years
+  const roundId = crypto.randomUUID();
+  // Store the truth server-side; the `year` field is dropped from the payload.
+  rounds.set(roundId, {
+    byId: new Map(picked.map((m) => [String(m.id), m.year])),
+    years,
+  });
   return {
-    roundId: crypto.randomUUID(),
-    movies: picked.map(({ id, title, year, poster }) => ({ id, title, year, poster })),
+    roundId,
+    movies: picked.map(({ id, title, poster }) => ({ id, title, poster })),
     years,
   };
 }
@@ -68,10 +76,12 @@ Two deliberate consequences:
 - **Distinct years.** No two movies in a round share a release year. That makes
   "title → year" a true one-to-one mapping, so the matching puzzle has a
   well-defined answer.
-- **Published mapping.** Each movie's real `year` is **included** in the
-  payload (`movies: [...]` keeps `year`). The four `years` are the same values,
-  just **reordered**. The client therefore always has the truth; it grades
-  locally (Module 3).
+- **Hidden answer key.** Each movie's real `year` is **never** included in the
+  payload (`movies: [...]` now keeps only `id`, `title`, `poster`). The true
+  title→year mapping is stored in the `rounds` map keyed by the round's
+  `roundId`. The four `years` are still sent, but only as the **shuffled
+  display values**; the browser can't tell which year belongs to which movie
+  until the server grades the round (via `POST /api/submit`, Module 3).
 
 ## Serving
 
@@ -85,6 +95,40 @@ app.get('/api/round', (_req, res) => {
 `Cache-Control: no-store` stops browsers/proxies from reusing a round. Finally
 the server serves the built React bundle (`client/dist`) and, for anything not
 under `/api`, returns `index.html` (SPA-style fallback).
+
+## Grading (server-side)
+
+The client never sees the true years, so when the user locks in a match it
+POSTs the round id and the `{ movieId: yearIdx }` assignments to `/api/submit`.
+The server looks up the stored answer key and grades there:
+
+```js
+app.post('/api/submit', (req, res) => {
+  const { roundId, assignments = {} } = req.body || {};
+  const key = rounds.get(roundId);
+  if (!key) {
+    return res.status(404).json({ error: 'unknown or expired round' });
+  }
+
+  let correct = 0;
+  const results = {}; // movieId -> { correct, year: true release year }
+  for (const [movieId, year] of key.byId) {
+    const chosenIdx = assignments[movieId];
+    const chosenYear = chosenIdx != null ? key.years[chosenIdx] : null;
+    const ok = chosenYear === year;
+    if (ok) correct++;
+    results[movieId] = { correct: ok, year };
+  }
+
+  res.json({ correct, total: key.byId.size, results });
+});
+```
+
+`app.use(express.json())` (added near the top of `server.js`) parses the POST
+body, so the middleware is actually used now. The response returns the tally
+plus, per movie, whether the choice was right and the **true** year — so the
+client can show the correct answer without having been trusted with it up
+front.
 
 ## Quiz
 
@@ -104,19 +148,20 @@ Answer from **this module only**.
 - C. So the client doesn't need the true year value.
 - D. To make the puzzle deliberately impossible.
 
-**Q3.** The response contains both `movies[].year` and a `years` array. What is
-the exact relationship between them?
+**Q3.** In the `/api/round` payload, which statement is true about how the true
+release years are handled?
 
-- A. `years` is a shuffled permutation of the four `movies[].year` values.
-- B. `years` are random integers unrelated to any movie in the round.
-- C. `years` contains every year in `movies.json`.
-- D. `years` equals the movies' years in the same order.
+- A. Each movie object carries its real `year`, and `years` is a reordering of them.
+- B. `years` is the only year source sent to the client; the movie→year truth is
+  kept server-side keyed by `roundId`.
+- C. Both `years` and each true mapping are sent so the client can grade locally.
+- D. `years` gets unrelated random integers; no year is tied to any movie.
 
 ## Answer key
 
 <!-- ROT13:START -->
-Nafjref: 1-P, 2-O, 3-Q
+Nafjref: 1-P, 2-O, 3-O
 1-P: ohvyqEbhaq fxvcf nal zbivr jubfr eryrnfr lrne nyernql fvgf va hfrqLrnef, thnenagrrvat sbhe zbivrf jvgu cnvejvfr-qvfgvapg eryrnfr lrnef.
 2-O: qvfgvapg lrnef znxr gur gvgyr-gb-lrne znccvat bar-gb-bar, fb gur zngpuvat chmmyr fgnlf jryy-qrsvarq.
-3-Q: gur lrnef neenl vf n fuhssyrq crezhgngvba bs rknpgyl gur sbhe cvpxrq zbivrf lrnef, cebqhprq ol gur pelcgb-onpxrq Svfure-Lngrf urycre fuhssyrq().
+3-O: bayl gur fuhssyrq lrnef neenl vf frag gb gur pyvrag; gur zbivr-gb-lrne gehgu vf fgberq freire-fvqr va gur ebhaqf znc xrlrq ol ebhaqVq naq hfrq bayl ol CBFG /ncv/fhozvg sbe tenqvat.
 <!-- ROT13:END -->

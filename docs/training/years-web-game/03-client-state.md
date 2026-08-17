@@ -10,6 +10,7 @@ const [selectedMovieId, setSelectedMovieId] = useState(null); // movie picked up
 const [selectedYearIdx, setSelectedYearIdx] = useState(null); // year picked up
 const [assignments, setAssignments] = useState({});           // { [movieId]: yearIdx }
 const [submitted, setSubmitted] = useState(false);
+const [result, setResult] = useState(null);                   // server verdict for this round
 const [score, setScore] = useState({ correct: 0, total: 0 });
 ```
 
@@ -89,26 +90,32 @@ elsewhere if it was already assigned.
 
 ## Submitting and scoring
 
-Submit is enabled only when all four movies are matched, then grades locally:
+Submit is enabled only when all four movies are matched. The client holds **no
+true years**, so it can't grade its own work — it POSTs the round id and its
+`assignments` map to `/api/submit` and asks the server:
 
 ```js
-function submit() {
-  const total = round.movies.length;
-  let correct = 0;
-  for (const m of round.movies) {
-    if (m.year === round.years[assignments[m.id]]) correct++;
-  }
-  setScore((s) => ({ correct: s.correct + correct, total: s.total + total }));
+async function submit() {
+  const resp = await fetch('/api/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ roundId: round.roundId, assignments }),
+  });
+  if (!resp.ok) throw new Error('failed to submit round');
+  const res = await resp.json();
+  setResult(res);
+  setScore((s) => ({ correct: s.correct + res.correct, total: s.total + res.total }));
   setSubmitted(true);
 }
 ```
 
-The comparison uses the index indirection from the state model: `round.years[
-assignments[m.id]]` is the year the user picked, compared to `m.year`, the true
-year that the server published. After that, `cardState(movie)` returns
-`'correct'` / `'wrong'` (or `null` before submit) to drive the green/red
-styling, and the footer button switches from **Submit** to **Next round**
-(which calls `startRound()` and resets all state).
+The response carries the server's ready-made tally and per-movie verdict
+(`{ correct, total, results }`). The client stores it in `result`, adds
+`res.correct` to the running score, and `cardState(movie)` now reads the
+server-declared outcome out of `result.results[movie.id]` — `'correct'` /
+`'wrong'` (or `null` before submit) to drive the green/red styling. The footer
+button switches from **Submit** to **Next round** (which calls `startRound()`
+and resets all state).
 
 ## Quiz
 

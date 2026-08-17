@@ -3,6 +3,7 @@
 // Express server for the "years" match game.
 //   - Serves the built React app from ./client/dist
 //   - Exposes /api/round for a fresh set of 4 movies + their shuffled years
+//   - Grades submitted matches on /api/submit (server-side, cheat-proof)
 //
 // The movie pool is read once from movies.json (produced by fetch-movies.js).
 // No runtime TMDB calls.
@@ -40,8 +41,15 @@ function shuffled(arr) {
   return out;
 }
 
+// Server-side answer keys for in-flight rounds, keyed by round id.
+// The true year mapping is NEVER sent to the client (see buildRound), so a
+// player cannot read the answer out of the page state or the bundle.
+const rounds = new Map(); // roundId -> { byId: Map(movieId -> year), years }
+
 // Build one playable round: 4 movies with distinct release years, and the
 // four years presented in a shuffled order (so the mapping is one-to-one).
+// The answer key is stored server-side; the client only receives the movie
+// posters/titles and the shuffled years, not the true years.
 function buildRound() {
   const picked = [];
   const usedYears = new Set();
@@ -53,11 +61,16 @@ function buildRound() {
   }
 
   const years = shuffled(picked.map((m) => m.year));
+  const roundId = crypto.randomUUID();
+  rounds.set(roundId, {
+    byId: new Map(picked.map((m) => [String(m.id), m.year])),
+    years,
+  });
   return {
-    roundId: crypto.randomUUID(),
-    // Movies include their year so the client keeps the mapping; the client
-    // itself is the source of truth for correctness after submission.
-    movies: picked.map(({ id, title, year, poster }) => ({ id, title, year, poster })),
+    roundId,
+    // Deliberately no `year` in the movie objects — the browser must not
+    // know the true years. See /api/submit for where grading actually happens.
+    movies: picked.map(({ id, title, poster }) => ({ id, title, poster })),
     years,
   };
 }
@@ -65,6 +78,29 @@ function buildRound() {
 app.get('/api/round', (_req, res) => {
   res.set('Cache-Control', 'no-store');
   res.json(buildRound());
+});
+
+// Grade a submitted round against the stored answer key. Correctness is
+// decided here, server-side, so a client cannot cheat by tampering with its
+// own score or by reading true years it was never sent.
+app.post('/api/submit', (req, res) => {
+  const { roundId, assignments = {} } = req.body || {};
+  const key = rounds.get(roundId);
+  if (!key) {
+    return res.status(404).json({ error: 'unknown or expired round' });
+  }
+
+  let correct = 0;
+  const results = {}; // movieId -> { correct, year: true release year }
+  for (const [movieId, year] of key.byId) {
+    const chosenIdx = assignments[movieId];
+    const chosenYear = chosenIdx != null ? key.years[chosenIdx] : null;
+    const ok = chosenYear === year;
+    if (ok) correct++;
+    results[movieId] = { correct: ok, year };
+  }
+
+  res.json({ correct, total: key.byId.size, results });
 });
 
 // Static production build (if present).
