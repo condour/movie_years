@@ -19,9 +19,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4310;
 
 let movies = [];
+// id -> movie, derived once from the pool. Grading looks up a movie's true
+// year here, so no per-round state ever needs to be stored.
+const moviesById = new Map();
 try {
   const data = JSON.parse(await readFile(path.join(__dirname, 'movies.json'), 'utf8'));
   movies = data;
+  for (const m of movies) moviesById.set(m.id, m);
   console.log(`Loaded ${movies.length} movies from movies.json`);
 } catch (err) {
   console.error('Could not load movies.json — run "npm run fetch" first.');
@@ -41,15 +45,10 @@ function shuffled(arr) {
   return out;
 }
 
-// Server-side answer keys for in-flight rounds, keyed by round id.
-// The true year mapping is NEVER sent to the client (see buildRound), so a
-// player cannot read the answer out of the page state or the bundle.
-const rounds = new Map(); // roundId -> { byId: Map(movieId -> year), years }
-
 // Build one playable round: 4 movies with distinct release years, and the
 // four years presented in a shuffled order (so the mapping is one-to-one).
-// The answer key is stored server-side; the client only receives the movie
-// posters/titles and the shuffled years, not the true years.
+// No per-round state is stored — the true years live on the pool itself, so
+// grading (via POST /api/submit) is fully stateless and idempotent.
 function buildRound() {
   const picked = [];
   const usedYears = new Set();
@@ -60,18 +59,11 @@ function buildRound() {
     if (picked.length === 4) break;
   }
 
-  const years = shuffled(picked.map((m) => m.year));
-  const roundId = crypto.randomUUID();
-  rounds.set(roundId, {
-    byId: new Map(picked.map((m) => [String(m.id), m.year])),
-    years,
-  });
   return {
-    roundId,
-    // Deliberately no `year` in the movie objects — the browser must not
-    // know the true years. See /api/submit for where grading actually happens.
+    // Deliberately no `year` in the movie objects and no roundId — the browser
+    // must not know the true years, and grading needs no stored answer key.
     movies: picked.map(({ id, title, poster }) => ({ id, title, poster })),
-    years,
+    years: shuffled(picked.map((m) => m.year)),
   };
 }
 
@@ -80,27 +72,25 @@ app.get('/api/round', (_req, res) => {
   res.json(buildRound());
 });
 
-// Grade a submitted round against the stored answer key. Correctness is
-// decided here, server-side, so a client cannot cheat by tampering with its
-// own score or by reading true years it was never sent.
+// Stateless, idempotent grading. The client reports the display year value it
+// picked for each movie ({ movieId: chosenYear }); the server looks up that
+// movie's true year directly on the pool and compares. No round state, and
+// the true years never leave the server.
 app.post('/api/submit', (req, res) => {
-  const { roundId, assignments = {} } = req.body || {};
-  const key = rounds.get(roundId);
-  if (!key) {
-    return res.status(404).json({ error: 'unknown or expired round' });
-  }
-
+  const { assignments = {} } = req.body || {};
   let correct = 0;
+  let total = 0;
   const results = {}; // movieId -> { correct, year: true release year }
-  for (const [movieId, year] of key.byId) {
-    const chosenIdx = assignments[movieId];
-    const chosenYear = chosenIdx != null ? key.years[chosenIdx] : null;
-    const ok = chosenYear === year;
+  for (const [movieId, chosenYear] of Object.entries(assignments)) {
+    const movie = moviesById.get(Number(movieId));
+    if (!movie || chosenYear == null) continue;
+    total++;
+    const ok = Number(chosenYear) === movie.year;
     if (ok) correct++;
-    results[movieId] = { correct: ok, year };
+    results[movieId] = { correct: ok, year: movie.year };
   }
 
-  res.json({ correct, total: key.byId.size, results });
+  res.json({ correct, total, results });
 });
 
 // Static production build (if present).

@@ -51,8 +51,8 @@ actually get a request body to parse?
 
 - A. No — `/api/round` is a GET and static serving sends files, so
   `express.json()` is never handed a request body.
-- B. Yes — the client POSTs `{ roundId, assignments }` as JSON to `/api/submit`
-  for server-side grading, so the middleware is required.
+- B. Yes — the client POSTs `{ assignments }` (movieId → chosen year value) as
+  JSON to `/api/submit` for server-side grading, so the middleware is required.
 - C. Yes — the client POSTs JSON straight to `/api/round`.
 - D. Yes — WebSocket upgrades send JSON that the middleware reads.
 
@@ -63,5 +63,5 @@ Nafjref: 1-O, 2-N, 3-O, 4-O
 1-O: unaqyrLrnePyvpx ergheaf rneyl jura lrneVqk vf nyernql vafvqr nffvtarqZbivrLrnef.olLrne, fb gur pyvpx vf vtaberq naq gur zbivr fgnlf cvpxrq hc.
 2-N: unaqyrZbivrPyvpx pnyyf frgFryrpgrqLrneVqk(ahyy) orsber gur nffvtazrag oenapu, fb pyvpxvat na nyernql-nffvtarq zbivr obgu qebcf gung nffvtazrag naq pyrnef nal yvsgrq lrne.
 3-O: zbivrOlVq vf pbzchgrq va gur eraqre obql ohg arire ersreraprq naljurer ryfr va gur svyr, znxvat vg qrnq pbqr.
-4-O: gur pyvrag CBFGf {ebhaqVq, nffvtazragf} nf WFBA gb /ncv/fhozvg sbe tenqvat, fb rkcerff.wfba() svanyyl unf n erdhrfg obql gb cnefr.
+4-O: gur pyvrag CBFGf WFBA gb /ncv/fhozvg ubyqvat gur pubfra qvfcynl-lrne inyhr cre zbivr (ab ebhaq vq), fb rkcerff.wfba() svanyyl unf n erdhrfg obql gb cnefr.
 <!-- ROT13:END -->

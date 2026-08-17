@@ -53,7 +53,7 @@ npm run dev
 | Step | File | Purpose |
 |------|------|---------|
 | Data download | `fetch-movies.js` | Pulls TMDB `discover` sorted by `vote_count.desc`, keeps the top 1000 titles from 1950+, writes `movies.json`. |
-| Server | `server.js` | Loads `movies.json` once. `GET /api/round` returns 4 movies with **distinct** release years plus the 4 years shuffled (one-to-one mapping) — **the true years are kept server-side and never sent to the browser**. `POST /api/submit` grades a round against its stored answer key, so correctness is decided on the server and can't be cheated. Serves the built React app. |
+| Server | `server.js` | Loads `movies.json` once. `GET /api/round` returns 4 movies with **distinct** release years plus the 4 years shuffled (one-to-one mapping) — **the true years are kept server-side and never sent to the browser**. `POST /api/submit` grades a round statelessly (comparing each reported year to the movie's true year on the in-memory pool, with no stored round state), so correctness is decided on the server and can't be cheated. Serves the built React app. |
 | Client | `client/src/App.jsx` | The game UI. It POSTs the user's matches to `/api/submit` and renders the server's verdict. |
 
 ## Playing

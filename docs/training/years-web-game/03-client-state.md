@@ -91,15 +91,20 @@ elsewhere if it was already assigned.
 ## Submitting and scoring
 
 Submit is enabled only when all four movies are matched. The client holds **no
-true years**, so it can't grade its own work — it POSTs the round id and its
-`assignments` map to `/api/submit` and asks the server:
+true years**, so it can't grade its own work. It resolves each assignment
+index to the display-year *value* it picked, POSTs that as `{ movieId:
+chosenYear }` to `/api/submit`, and lets the server decide:
 
 ```js
 async function submit() {
+  const reported = {};
+  for (const [movieId, yearIdx] of Object.entries(assignments)) {
+    reported[movieId] = round.years[yearIdx]; // index -> display year value
+  }
   const resp = await fetch('/api/submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ roundId: round.roundId, assignments }),
+    body: JSON.stringify({ assignments: reported }),
   });
   if (!resp.ok) throw new Error('failed to submit round');
   const res = await resp.json();
@@ -109,13 +114,14 @@ async function submit() {
 }
 ```
 
-The response carries the server's ready-made tally and per-movie verdict
-(`{ correct, total, results }`). The client stores it in `result`, adds
-`res.correct` to the running score, and `cardState(movie)` now reads the
-server-declared outcome out of `result.results[movie.id]` — `'correct'` /
-`'wrong'` (or `null` before submit) to drive the green/red styling. The footer
-button switches from **Submit** to **Next round** (which calls `startRound()`
-and resets all state).
+Note there's **no round id** sent — the server grades statelessly by comparing
+each reported year to the movie's true year on its pool. The response carries
+the server's ready-made tally and per-movie verdict (`{ correct, total,
+results }`). The client stores it in `result`, adds `res.correct` to the
+running score, and `cardState(movie)` reads the server-declared outcome out of
+`result.results[movie.id]` — `'correct'` / `'wrong'` (or `null` before submit)
+to drive the green/red styling. The footer button switches from **Submit** to
+**Next round** (which calls `startRound()` and resets all state).
 
 ## Quiz
 

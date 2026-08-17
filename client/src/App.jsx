@@ -110,13 +110,19 @@ export default function App() {
     setSelectedYearIdx(yearIdx === selectedYearIdx ? null : yearIdx);
   }
 
-  // Hand the round + the user's matches to the server, which grades it
-  // (the client holds no true years, so it could not grade anyway).
+  // Hand the round + the user's picks to the server, which grades them
+  // statelessly. The client resolves each assignment index to the display
+  // year value it picked, then reports { movieId: chosenYear } — no round id,
+  // and the client still holds no true years so only the server can judge.
   async function submit() {
+    const reported = {};
+    for (const [movieId, yearIdx] of Object.entries(assignments)) {
+      reported[movieId] = round.years[yearIdx];
+    }
     const resp = await fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roundId: round.roundId, assignments }),
+      body: JSON.stringify({ assignments: reported }),
     });
     if (!resp.ok) throw new Error('failed to submit round');
     const res = await resp.json();

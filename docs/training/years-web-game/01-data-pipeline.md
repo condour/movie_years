@@ -56,7 +56,9 @@ seenByTitle.add(r.title);
 - **(2)** `MIN_YEAR === 1950` — and note it's **`>=`**, so a movie released in
   1950 itself passes; anything earlier is dropped.
 - **(3)** a row is dropped if its `id` **or** its exact `title` has already been
-  seen. Two different films that share a title still collapse to one row.
+  seen. Two different films that share a title collapse to one row — and
+  because rows arrive ordered by `vote_count.desc`, the higher-vote title is
+  seen first and kept.
 
 Because we keep removing movies, we may paginate past page 1; the log reports
 `page N: <kept> movies` as it goes. After reaching the goal it trims to the
@@ -87,19 +89,30 @@ Which statement is exactly true?
 - C. The filter also rejects every film with a poster.
 - D. The filter rejects all films released before 2010.
 
-**Q3.** A very popular film appears in two TMDB pages under the exact same
-title. What happens?
+**Q3.** A second TMDB row arrives whose title has already been seen by the
+dedup filter. What happens at that exact point in `download()`?
 
-- A. Two rows are stored, one per page.
-- B. Both are kept; duplicates are harmless.
-- C. The second occurrence is skipped because the title is already in a Set.
-- D. Only the row with the higher `vote_count` survives.
+- A. It is added to `seenByTitle` immediately, then filtered out later.
+- B. It is skipped by a guard-first `continue` before it is ever added to a set
+  or kept in the pool.
+- C. It overwrites the earlier row that already had the title.
+- D. The first row is removed to make room for the second.
+
+**Q4.** Two different films share the exact same title but different vote
+counts. Which single row ends up in `movies.json`?
+
+- A. Both rows survive, doubling that title's appearances.
+- B. The one with the lower `vote_count`.
+- C. The one with the higher `vote_count` (it arrives first under
+  `vote_count.desc` ordering).
+- D. Neither — the title is dropped entirely.
 
 ## Answer key
 
 <!-- ROT13:START -->
-Nafjref: 1-N, 2-O, 3-Q
+Nafjref: 1-N, 2-O, 3-O, 4-P
 1-N: srgpuCntr frgf fbeg_ol=ibgr_pbhag.qrfp, fb gur zbfg-ibgrq zbivrf fgernz va svefg naq qbjaybnq() fgbcf bapr QRFVERQ_PBHAG (1000) ebjf ner pbyyrpgrq.
 2-O: ZVA_LRNE vf 1950 naq gur svygre xrrcf eryrnfr lrnef >= 1950 (fb 1950 vgfrys cnffrf) juvyr nyfb erwrpgvat nqhyg naq ivqrb ragevrf.
-3-Q: qrqhcr hfrf gjb Frgf, bar xrlrq ol vq naq bar ol gvgyr, fb n gvgyr frra gjvpr fgvyy pbagevohgrf bayl n fvatyr ebj gb zbivrf.wfba.
+3-O: gur thneq-svefg pbagvahr ehaf ba n gvgyr nyernql va frraOlGvgyr, fb gur qhcyvpngr ebj vf fxvccrq orsber vg vf nqqrq gb nal frg be gb gur cbby.
+4-P: ebjf neevir beqrerq ol ibgr_pbhag.qrfp, fb gur uvture-ibgr gvgyr vf frra svefg naq xrcg; gur rdhny-gvgyr qhcyvpngr vf fxvccrq, yrnivat bar ebj va zbivrf.wfba.
 <!-- ROT13:END -->

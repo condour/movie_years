@@ -34,12 +34,13 @@ TMDB ──npm run fetch──▶ fetch-movies.js ──writes──▶ movies.j
 
 - **Data authority:** the server picks which 4 movies appear and which 4 years
   are shown. Only the **shuffled years** are sent; each movie's **true**
-  release year is kept in a server-side answer key keyed by round id.
-- **Correctness judge:** the **server**. Because the true years never reach the
-  browser, a player can't read the answer out of the page state or the bundle.
-  When the user submits, `App.jsx` POSTs the round id + matches to
-  `POST /api/submit`, and the server grades against its answer key and returns
-  the per-movie results.
+  release year lives on the in-memory pool, server-side, and is never shipped.
+- **Correctness judge:** the **server**, and it stays stateless. Because the
+  true years never reach the browser, a player can't read the answer out of the
+  page state or the bundle. When the user submits, `App.jsx` POSTs the picks to
+  `POST /api/submit`; the server compares each reported year to the movie's
+  true year on the pool and returns the per-movie results. No round id or
+  stored answer key is involved — the pool itself is the ground truth.
 
 ## Dev vs. production
 
@@ -63,7 +64,8 @@ Answer from **this module only** — the repo is not needed.
 (cards turn green/red)?
 
 - A. On the client, inside `App.jsx`, using each movie's true year.
-- B. On the server, at `POST /api/submit`, against an answer key kept per round.
+- B. On the server, at `POST /api/submit`, by comparing each reported year to
+  the movie's true year on the in-memory pool (no stored round state).
 - C. By a second call to TMDB at submit time.
 - D. The server re-reads `movies.json` for the answer on every submission.
 
@@ -79,6 +81,6 @@ Answer from **this module only** — the repo is not needed.
 <!-- ROT13:START -->
 Nafjref: 1-O, 2-O, 3-P
 1-O: freire.wf bayl ernqf zbivrf.wfba qhevat vgf jubyr yvsrgvzr; srgpu-zbivrf.wf qbrf gur bar-gvzr qbjaybnq. Gur ehagvzr znxrf mreb GZQO pnyyf.
-2-O: gur freire xrrcf rnpu ebhaq'f gehr lrnef va n freire-fvqr nafjre xrl naq tenqrf ba CBFG /ncv/fhozvg, fb pbeerpgarff vf arire qrpvqrq va gur oebjfre.
+2-O: gur freire qrpvqrf pbeerpgarff fgngryrffyl ba CBFG /ncv/fhozvg, pbzcnevat rnpu ercbegrq lrne gb gur zbivr'f gehr lrne uryq ba gur va-zrzbel cbby; ab ebhaq fgngr vf fgberq naq gur gehr lrnef arire ernpu gur oebjfre.
 3-P: qri zbqr ehaf gjb cebprffrf (Rkcerff ba 4310 naq Ivgr ba 5173); Ivgr cebkvrf /ncv gb gur onpxraq, juvyr cebqhpgvba freirf gur ohvyg ncc fgenvtug sebz Rkcerff.
 <!-- ROT13:END -->
