@@ -150,9 +150,4 @@ Answer from **this module only**.
 
 ## Answer key
 
-<!-- ROT13:START -->
-Nafjref: 1-O, 2-N, 3-P
-1-O: nffvtazragf zncf rnpu zbivrVq gb n lrneVqk, na vaqrk vagb ebhaq.lrnef; gur erny lrne vf yngre ernq onpx jvgu ebhaq.lrnef[nffvtazragf[vq]].
-2-N: obgu pyvpx beqref jbex: cvpx n zbivr gura n lrne, be cvpx n lrne gura n zbivr; gur qebc ybtvp yvirf va obgu unaqyref.
-3-P: pyvpxvat na nffvtarq zbivr pnyyf qryrgr ba vgf xrl, ha-nffvtavat vg fb lbh pna punatr gur zngpu; Fhozvg fgnlf qvfnoyrq hagvy rknpgyl sbhe zngpurf rkvfg.
-<!-- ROT13:END -->
+Answers are in `answers.md` — attempt the questions before reading it.

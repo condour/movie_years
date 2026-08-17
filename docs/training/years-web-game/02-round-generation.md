@@ -155,9 +155,4 @@ release years are handled?
 
 ## Answer key
 
-<!-- ROT13:START -->
-Nafjref: 1-P, 2-O, 3-O
-1-P: ohvyqEbhaq fxvcf nal zbivr jubfr eryrnfr lrne nyernql fvgf va hfrqLrnef, thnenagrrvat sbhe zbivrf jvgu cnvejvfr-qvfgvapg eryrnfr lrnef.
-2-O: qvfgvapg lrnef znxr gur gvgyr-gb-lrne znccvat bar-gb-bar, fb gur zngpuvat chmmyr fgnlf jryy-qrsvarq.
-3-O: gur pyvrag vf frag bayl gur fuhssyrq lrnef neenl; gur zbivr-gb-lrne gehgu yvirf ba gur freire'f va-zrzbel cbby (zbivrfOlVq) naq vf pbafhygrq bayl ng tenqr gvzr, fb ab ebhaq fgngr be nafjre xrl vf fgberq.
-<!-- ROT13:END -->
+Answers are in `answers.md` — attempt the questions before reading it.

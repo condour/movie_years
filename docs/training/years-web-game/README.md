@@ -22,17 +22,17 @@ logic across them.
 | 3   | `03-client-state.md`         | `App.jsx`: state + interaction + score  |
 | 4   | `04-code-reading-round.md`   | Requires opening the codebase           |
 
-## About the answer keys
+## About the answer key
 
-Each module ends with an answer key [ROT13](https://en.wikipedia.org/wiki/ROT13)-encoded
-between `<!-- ROT13:START -->` / `<!-- ROT13:END -->` markers. Questions are
-plaintext; only the key is scrambled.
+All answers live in **one** plaintext file, [`answers.md`](answers.md), at the
+same level as the modules. No encoding. It contains the correct letter for
+every question in every module. Don't read it until you've committed to your
+own answers.
 
 ## Suggested workflow
 
 1. Read a module top to bottom.
-2. Answer its multiple-choice questions **by letter only** (e.g. `1-B, 2-D`)
-   before decoding anything.
-3. Decode that module's key (`tr 'A-Za-z' 'N-ZA-Mn-za-m'`, or just ask the
-   agent to "decode the answer key for module N"), then reconcile any misses.
+2. Answer its multiple-choice questions **by letter only** (e.g. `1-B, 2-D`).
+3. Open `answers.md` to check that module's answers, then reconcile any
+   misses.
 4. Move to the next module. Keep the code-reading round for last.

@@ -78,9 +78,4 @@ Answer from **this module only** — the repo is not needed.
 
 ## Answer key
 
-<!-- ROT13:START -->
-Nafjref: 1-O, 2-O, 3-P
-1-O: freire.wf bayl ernqf zbivrf.wfba qhevat vgf jubyr yvsrgvzr; srgpu-zbivrf.wf qbrf gur bar-gvzr qbjaybnq. Gur ehagvzr znxrf mreb GZQO pnyyf.
-2-O: gur freire qrpvqrf pbeerpgarff fgngryrffyl ba CBFG /ncv/fhozvg, pbzcnevat rnpu ercbegrq lrne gb gur zbivr'f gehr lrne uryq ba gur va-zrzbel cbby; ab ebhaq fgngr vf fgberq naq gur gehr lrnef arire ernpu gur oebjfre.
-3-P: qri zbqr ehaf gjb cebprffrf (Rkcerff ba 4310 naq Ivgr ba 5173); Ivgr cebkvrf /ncv gb gur onpxraq, juvyr cebqhpgvba freirf gur ohvyg ncc fgenvtug sebz Rkcerff.
-<!-- ROT13:END -->
+Answers are in `answers.md` — attempt the questions before reading it.

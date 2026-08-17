@@ -58,10 +58,4 @@ actually get a request body to parse?
 
 ## Answer key
 
-<!-- ROT13:START -->
-Nafjref: 1-O, 2-N, 3-O, 4-O
-1-O: unaqyrLrnePyvpx ergheaf rneyl jura lrneVqk vf nyernql vafvqr nffvtarqZbivrLrnef.olLrne, fb gur pyvpx vf vtaberq naq gur zbivr fgnlf cvpxrq hc.
-2-N: unaqyrZbivrPyvpx pnyyf frgFryrpgrqLrneVqk(ahyy) orsber gur nffvtazrag oenapu, fb pyvpxvat na nyernql-nffvtarq zbivr obgu qebcf gung nffvtazrag naq pyrnef nal yvsgrq lrne.
-3-O: zbivrOlVq vf pbzchgrq va gur eraqre obql ohg arire ersreraprq naljurer ryfr va gur svyr, znxvat vg qrnq pbqr.
-4-O: gur pyvrag CBFGf WFBA gb /ncv/fhozvg ubyqvat gur pubfra qvfcynl-lrne inyhr cre zbivr (ab ebhaq vq), fb rkcerff.wfba() svanyyl unf n erdhrfg obql gb cnefr.
-<!-- ROT13:END -->
+Answers are in `answers.md` — attempt the questions before reading it.

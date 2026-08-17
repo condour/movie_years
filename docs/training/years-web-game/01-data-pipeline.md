@@ -109,10 +109,4 @@ counts. Which single row ends up in `movies.json`?
 
 ## Answer key
 
-<!-- ROT13:START -->
-Nafjref: 1-N, 2-O, 3-O, 4-P
-1-N: srgpuCntr frgf fbeg_ol=ibgr_pbhag.qrfp, fb gur zbfg-ibgrq zbivrf fgernz va svefg naq qbjaybnq() fgbcf bapr QRFVERQ_PBHAG (1000) ebjf ner pbyyrpgrq.
-2-O: ZVA_LRNE vf 1950 naq gur svygre xrrcf eryrnfr lrnef >= 1950 (fb 1950 vgfrys cnffrf) juvyr nyfb erwrpgvat nqhyg naq ivqrb ragevrf.
-3-O: gur thneq-svefg pbagvahr ehaf ba n gvgyr nyernql va frraOlGvgyr, fb gur qhcyvpngr ebj vf fxvccrq orsber vg vf nqqrq gb nal frg be gb gur cbby.
-4-P: ebjf neevir beqrerq ol ibgr_pbhag.qrfp, fb gur uvture-ibgr gvgyr vf frra svefg naq xrcg; gur rdhny-gvgyr qhcyvpngr vf fxvccrq, yrnivat bar ebj va zbivrf.wfba.
-<!-- ROT13:END -->
+Answers are in `answers.md` — attempt the questions before reading it.
