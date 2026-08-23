@@ -17,10 +17,12 @@ export default function App() {
   // selectedYearIdx: year currently picked up (waiting for a movie).
   // assignments: { [movieId]: yearIdx }
   // submitted: whether results are shown for the current round.
+  // result: server-declared grading for this round ({ correct, total, results }).
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [selectedYearIdx, setSelectedYearIdx] = useState(null);
   const [assignments, setAssignments] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
 
   const startRound = useCallback(async () => {
@@ -31,6 +33,7 @@ export default function App() {
       setSelectedMovieId(null);
       setSelectedYearIdx(null);
       setSubmitted(false);
+      setResult(null);
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -59,8 +62,6 @@ export default function App() {
     return <div className="app error-screen">Could not start the game: {error}</div>;
   }
   if (!round) return <div className="app loading">Loading a round…</div>;
-
-  const movieById = Object.fromEntries(round.movies.map((m) => [m.id, m]));
 
   // ---- Interaction --------------------------------------------------------
   function handleMovieClick(movieId) {
@@ -107,21 +108,32 @@ export default function App() {
     setSelectedYearIdx(yearIdx === selectedYearIdx ? null : yearIdx);
   }
 
-  function submit() {
-    const total = round.movies.length;
-    let correct = 0;
-    for (const m of round.movies) {
-      if (m.year === round.years[assignments[m.id]]) correct++;
+  // Hand the round + the user's picks to the server, which grades them
+  // statelessly. The client resolves each assignment index to the display
+  // year value it picked, then reports { movieId: chosenYear } — no round id,
+  // and the client still holds no true years so only the server can judge.
+  async function submit() {
+    const reported = {};
+    for (const [movieId, yearIdx] of Object.entries(assignments)) {
+      reported[movieId] = round.years[yearIdx];
     }
-    setScore((s) => ({ correct: s.correct + correct, total: s.total + total }));
+    const resp = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assignments: reported }),
+    });
+    if (!resp.ok) throw new Error('failed to submit round');
+    const res = await resp.json();
+    setResult(res);
+    setScore((s) => ({ correct: s.correct + res.correct, total: s.total + res.total }));
     setSubmitted(true);
   }
 
   function cardState(movie) {
-    if (!submitted) return null;
-    const chosen = assignments[movie.id] != null ? round.years[assignments[movie.id]] : null;
-    if (chosen === null) return null;
-    return chosen === movie.year ? 'correct' : 'wrong';
+    if (!result) return null;
+    const res = result.results[movie.id];
+    if (!res) return null;
+    return res.correct ? 'correct' : 'wrong';
   }
 
   // ---- Render ------------------------------------------------------------
@@ -159,7 +171,7 @@ export default function App() {
                     <span className="title">{m.title}</span>
                     {submitted && assigned !== null && (
                       <span className={`result ${state}`}>
-                        {state === 'correct' ? '✓' : `→ ${m.year}`}
+                        {state === 'correct' ? '✓' : `→ ${result.results[m.id].year}`}
                       </span>
                     )}
                   </div>

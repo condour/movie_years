@@ -53,8 +53,8 @@ npm run dev
 | Step | File | Purpose |
 |------|------|---------|
 | Data download | `fetch-movies.js` | Pulls TMDB `discover` sorted by `vote_count.desc`, keeps the top 1000 titles from 1950+, writes `movies.json`. |
-| Server | `server.js` | Loads `movies.json` once. `GET /api/round` returns a round: 4 movies with **distinct** release years plus the 4 years in a shuffled order (one-to-one mapping). Serves the built React app. |
-| Client | `client/src/App.jsx` | The game UI + scoring. |
+| Server | `server.js` | Loads `movies.json` once. `GET /api/round` returns 4 movies with **distinct** release years plus the 4 years shuffled (one-to-one mapping) — **the true years are kept server-side and never sent to the browser**. `POST /api/submit` grades a round statelessly (comparing each reported year to the movie's true year on the in-memory pool, with no stored round state), so correctness is decided on the server and can't be cheated. Serves the built React app. |
+| Client | `client/src/App.jsx` | The game UI. It POSTs the user's matches to `/api/submit` and renders the server's verdict. |
 
 ## Playing
 
@@ -62,6 +62,7 @@ npm run dev
 2. Click the matching **year** to assign it — a "chip" shows the assignment on
    the movie card.
 3. Click an assigned movie again to un-assign it and change your mind.
-4. Once all 4 are matched, hit **Submit**. Correct matches turn green; wrong
-   ones turn red and reveal the movie's true year.
+4. Once all 4 are matched, hit **Submit**. The request is sent to the server,
+   which grades the round (server-side). Correct matches turn green; wrong
+   ones turn red and reveal the movie's true year (returned by the grader).
 5. A running score accumulates across rounds. Click **Next round** to continue.
